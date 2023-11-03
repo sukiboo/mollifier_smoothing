@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -6,7 +7,6 @@ from collections import defaultdict
 from target_functions import setup_optimization
 
 
-#TODO: logging
 #TODO: visualization
 class Experiment:
 
@@ -20,13 +20,19 @@ class Experiment:
         self.logs = defaultdict(list)
         self.mc_rng = np.random.default_rng(seed=self.random_seed)
 
+    def run(self, distribution_parameters):
+        """Optimize target function with different kernels."""
+        print(f'Optimizing {self.dim}-dimensional {self.function_name} function...')
+        for dist_params in distribution_parameters:
+            self.optimize(*dist_params)
+        self.save_logs()
+
     def optimize(self, dist, params):
         """Minimize target function with a given distribution."""
         self.__dict__.update(params)
         x = self.x0.copy()
         self.logs[dist].append(self.fun(x))
-        print(f'Optimizing {self.dim}-{self.function_name} with {dist} distribution...')
-        for _ in tqdm(range(self.num_steps)):
+        for _ in tqdm(range(self.num_steps), desc=f'{dist:>8s}'):
             grad = self.smoothed_gradient(x, dist)
             x -= self.lr * grad
             self.logs[dist].append(self.fun(x))
@@ -54,15 +60,17 @@ class Experiment:
         grad = u * (self.fun(x + self.sigma * u) - self.fun(x - self.sigma * u)) / (2 * self.sigma)
         return grad.mean(axis=0)
 
+    def save_logs(self):
+        """Save logs to a csv file."""
+        os.makedirs('./logs/', exist_ok=True)
+        self.df = pd.DataFrame(exp.logs)
+        self.df.to_csv(f'./logs/{self.exp_name}.csv')
+        print(f'\n{self.df}')
+
 
 if __name__ == '__main__':
 
-    # setup experiment
-    exp_params = {'function_name': 'sphere', 'dim': 100,
-                  'num_steps': 10000, 'num_mc': 100, 'random_seed': 0}
-    exp = Experiment(exp_params)
-
-    # setup optimization parameters
+    # setup distribution parameters
     distribution_parameters = [
         ['normal', {'sigma': 1., 'lr': 1e-3}],
         ['uniform', {'sigma': 1., 'lr': 1e-3}],
@@ -72,8 +80,10 @@ if __name__ == '__main__':
         ['t', {'sigma': 1., 'lr': 1e-3}],
         ]
 
-    # optimize with different kernels
-    for dist_params in distribution_parameters:
-        exp.optimize(*dist_params)
-    print(pd.DataFrame(exp.logs))
+    # setup experiment
+    exp_params = {'function_name': 'sphere', 'dim': 100,
+                  'num_steps': 10000, 'num_mc': 100,
+                  'random_seed': 0, 'exp_name': 'test'}
+    exp = Experiment(exp_params)
+    exp.run(distribution_parameters)
 
