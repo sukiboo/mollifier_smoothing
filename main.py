@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 from collections import defaultdict
 
@@ -13,12 +14,13 @@ class Experiment:
 
     def setup_target_function(self):
         """Define target function to be minimized and sample an initial guess."""
-        self.fun, self.x0 = setup_optimization(params, self.random_seed)
+        self.fun, self.x0 = setup_optimization(self.function_name, self.dim, self.random_seed)
         self.logs = defaultdict(list)
         self.mc_rng = np.random.default_rng(seed=self.random_seed)
 
-    def optimize(self, dist='normal'):
+    def optimize(self, dist, dist_params):
         """Minimize target function with a given distribution."""
+        self.__dict__.update(dist_params)
         x = self.x0.copy()
         self.logs[dist].append(self.fun(x))
         print(f'Optimizing {self.dim}-{self.function_name} with {dist} distribution...')
@@ -53,11 +55,23 @@ class Experiment:
 
 if __name__ == '__main__':
 
-    params = {'function_name': 'sphere', 'dim': 100, 'random_seed': 0,
-              'num_steps': 10000, 'num_mc': 10, 'sigma': 1., 'lr': 1e-3}
-    exp = Experiment(params)
+    # setup experiment
+    exp_params = {'function_name': 'sphere', 'dim': 100,
+                  'num_steps': 10000, 'num_mc': 1000, 'random_seed': 0}
+    exp = Experiment(exp_params)
+
+    # setup optimization parameters
+    distribution_parameters = {
+        'normal': {'sigma': 1., 'lr': 1e-3},
+        'uniform': {'sigma': 1., 'lr': 1e-3},
+        'cauchy': {'sigma': 1., 'lr': 1e-3},
+        'laplace': {'sigma': 1., 'lr': 1e-3},
+        'logistic': {'sigma': 1., 'lr': 1e-3},
+        't': {'sigma': 1., 'lr': 1e-3},
+        }
 
     # optimize with different kernels
-    for dist in ['normal', 'uniform', 'cauchy', 'laplace', 'logistic', 't']:
-        exp.optimize(dist=dist)
+    for dist, dist_params in distribution_parameters.items():
+        exp.optimize(dist=dist, dist_params=dist_params)
+    print(pd.DataFrame(exp.logs))
 

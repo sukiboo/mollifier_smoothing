@@ -1,20 +1,17 @@
 """
     A list of optimization benchmark functions from
     https://www.sfu.ca/~ssurjano/optimization.html
+
+    Each target function should take a numpy array as an input
 """
 
 import numpy as np
 
 
-def target_function(function_params, random_seed=None):
-    """Setup benchmark function"""
-    function_name = function_params['function_name']
-    dim = function_params['dim']
-    if random_seed:
-        np.random.seed(random_seed)
-
+def target_function(function_name, dim):
+    """Setup benchmark function."""
     # Ackley function
-    elif function_name == 'ackley':
+    if function_name == 'ackley':
         fun = lambda x: -20 * np.exp(-.2 * np.sqrt(np.sum(x**2) / dim))\
             - np.exp(np.sum(np.cos(2*np.pi*x)) / dim) + 20 + np.exp(1)
         x_dom = [[-32.768, 32.768]] * dim
@@ -102,7 +99,7 @@ def target_function(function_params, random_seed=None):
         x_min = [8.05502, 9.66459]
 
     else:
-        raise SystemExit('function {:s} is not defined...'.format(function_name))
+        raise SystemExit(f'function {function_name} is not defined...')
 
     return fun, np.array(x_min), np.array(x_dom).T
 
@@ -115,9 +112,9 @@ def initial_guess(x_dom, random_seed):
     return x0
 
 
-def setup_optimization(function_params, random_seed, noise=0):
+def setup_optimization(function_name, dim, random_seed=0, noise=0):
     """Return a target function and an initial guess"""
-    target_fun, x_min, x_dom = target_function(function_params, random_seed)
+    target_fun, x_min, x_dom = target_function(function_name, dim)
     x0 = initial_guess(x_dom, random_seed)
 
     # add random noise
