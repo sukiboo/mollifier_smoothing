@@ -47,22 +47,30 @@ class Experiment:
         # https://numpy.org/doc/stable/reference/random/generator.html#distributions
         if dist.startswith('normal'):
             u = self.mc_rng.normal(size=(self.num_mc, self.dim))
+            g = u / self.sigma
         elif dist.startswith('uniform'):
             u = 2*self.mc_rng.random(size=(self.num_mc, self.dim)) - 1
-        elif dist.startswith('cauchy'):
-            u = self.mc_rng.standard_cauchy(size=(self.num_mc, self.dim))
-        elif dist.startswith('laplace'):
-            u = self.mc_rng.laplace(size=(self.num_mc, self.dim))
+            g = u / self.sigma
+        ##elif dist.startswith('cauchy'):
+            ##u = self.mc_rng.standard_cauchy(size=(self.num_mc, self.dim))
+            ##g = ??
+        ##elif dist.startswith('laplace'):
+            ##u = self.mc_rng.laplace(size=(self.num_mc, self.dim))
+            ##g = ??
         elif dist.startswith('logistic'):
             u = self.mc_rng.logistic(size=(self.num_mc, self.dim))
+            norm_u = np.linalg.norm(u, axis=1, keepdims=True)
+            g = u / (norm_u * (1 + np.exp(-norm_u)))
         elif dist.startswith('t'):
-            u = self.mc_rng.standard_t(1, size=(self.num_mc, self.dim))
+            degree_of_freedom = 1
+            u = self.mc_rng.standard_t(degree_of_freedom, size=(self.num_mc, self.dim))
+            g = u * (degree_of_freedom + self.dim) / (degree_of_freedom + np.sum(u**2, axis=1))
         else:
             raise NameError(f'distribution {dist} is not recognized...')
 
         # estimate smoothed gradient
         fun_diff = (self.fun(x + self.sigma * u) - self.fun(x - self.sigma * u)).reshape(-1,1)
-        grad = u * fun_diff / (2 * self.sigma)
+        grad = g * fun_diff
         return grad.mean(axis=0, keepdims=True)
 
     def save_logs(self):
@@ -92,9 +100,6 @@ if __name__ == '__main__':
                   'random_seed': 0, 'exp_name': 'dev'}
     exp = Experiment(exp_params)
     exp.run(distribution_parameters)
-
-    # aggregate statistics
-    # exp.df.groupby(lambda x: x.split('|')[0], axis=1).mean()
     '''
 
 
