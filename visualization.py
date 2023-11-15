@@ -70,11 +70,28 @@ def visualize_search(logfile, percentile=(.25,.5,.75), show=True):
         plt.close()
 
 
+def find_best_parameters(logfile, percentile=.5):
+    """Report the best hyperparameters."""
+    # read logs and aggregate statistics over multiple runs
+    df = pd.read_csv(logfile, index_col=0)
+    df_stat = df.groupby(lambda x: x.split('|')[0], axis=1).quantile(percentile)
+    T = len(df_stat)
+
+    # find the parameters that provide the minimal values
+    sigmas = [1e+1, 1e+0, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
+    lrs = [1e+0, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
+    best_ij = df_stat.loc[T-1].idxmin()
+    i, j = int(best_ij[-2]), int(best_ij[-1])
+    print(f'best parameters for {logfile}:  sigma = {sigmas[i]:.2e},  '\
+        + f'lr = {lrs[j]:.2e},  median = {df_stat.loc[T-1][best_ij]:.2e}')
+
+
 if __name__ == '__main__':
 
     # visualize each log file
     logdir = './logs/'
     for logfile in sorted(os.listdir(logdir)):
+        find_best_parameters(logdir + logfile)
         ##visualize(logdir + logfile, show=True)
-        visualize_search(logdir + logfile, show=False)
+        ##visualize_search(logdir + logfile, show=False)
 
