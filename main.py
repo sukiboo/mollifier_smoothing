@@ -69,7 +69,7 @@ class Experiment:
         elif dist.startswith('truncnorm'):
             # this is wrong
             u = truncnorm.rvs(-1, 1, size=(self.num_mc, self.dim),
-                              random_state=self.rng(1e+9))
+                              random_state=self.rng.integers(1e+9))
             g = u / self.sigma
 
         # t distribution
