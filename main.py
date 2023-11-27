@@ -43,6 +43,7 @@ class Experiment:
             grad = self.smoothed_gradient(x, dist)
             x -= self.lr * grad
             self.logs[savename].append(self.fun(x).item())
+        print(f'{self.fun(x).item():.6f}')
 
     def smoothed_gradient(self, x, dist):
         """Estimate smoothed gradient of the target function at the point x with a given kernel."""
@@ -76,7 +77,8 @@ class Experiment:
         elif dist.startswith('t'):
             degree_of_freedom = 1
             u = self.mc_rng.standard_t(degree_of_freedom, size=(self.num_mc, self.dim))
-            g = u * (degree_of_freedom + self.dim) / (degree_of_freedom + np.sum(u**2, axis=1))
+            norm_u2 = np.sum(u**2, axis=1, keepdims=True)
+            g = u * (degree_of_freedom + self.dim) / (degree_of_freedom + norm_u2)
 
         else:
             raise NameError(f'distribution {dist} is not recognized...')
@@ -96,7 +98,7 @@ class Experiment:
 
 if __name__ == '__main__':
 
-    ##'''
+    '''
     # parse the arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config',
@@ -118,34 +120,34 @@ if __name__ == '__main__':
     # setup and run the experiment
     exp = Experiment(experiment_parameters)
     exp.run(distribution_parameters)
-    ##'''
+    '''
 
 
-    ##'''hyperparameter search'''
-    ### setup experiment
-    ##exp_params = {'function_name': 'sphere', 'dim': 100,
-                  ##'num_steps': 10000, 'num_mc': 1000, 'num_tests': 10,
-                  ##'random_seed': 0, 'exp_name': 'dev'}
+    '''hyperparameter search'''
+    # setup experiment
+    exp_params = {'function_name': 'sphere', 'dim': 100,
+                  'num_steps': 10000, 'num_mc': 1000, 'num_tests': 10,
+                  'random_seed': 0, 'exp_name': 'dev'}
 
-    ### define parameter grid
-    ##funcs = ['sphere', 'ackley', 'levy', 'michalewicz', 'rastrigin', 'rosenbrock', 'schwefel']
-    ##dists = ['normal', 'uniform', 'cauchy', 'laplace', 'logistic', 't']
-    ##sigmas = [1e+1, 1e+0, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
-    ##lrs = [1e+0, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
+    # define parameter grid
+    funcs = ['sphere', 'ackley', 'levy', 'michalewicz', 'rastrigin', 'rosenbrock', 'schwefel']
+    dists = ['normal', 'uniform', 'logistic', 't', 'truncnorm']
+    sigmas = [1e+1, 1e+0, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
+    lrs = [1e+0, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
 
-    ### run search for all distributions and parameters
-    ##for func in funcs:
-        ##exp_params['function_name'] = func
-        ##for dist in dists:
-            ##exp_params['exp_name'] = f'{func}_{dist}'
-            ##distribution_parameters = []
+    # run search for all distributions and parameters
+    for func in funcs:
+        exp_params['function_name'] = func
+        for dist in dists:
+            exp_params['exp_name'] = f'{func}_{dist}'
+            distribution_parameters = []
 
-            ### form parameter list
-            ##for i, sigma in enumerate(sigmas):
-                ##for j, lr in enumerate(lrs):
-                    ##distribution_parameters.append({f'{dist}_{i}{j}': {'sigma': sigma, 'lr': lr}})
+            # form parameter list
+            for i, sigma in enumerate(sigmas):
+                for j, lr in enumerate(lrs):
+                    distribution_parameters.append({f'{dist}_{i}{j}': {'sigma': sigma, 'lr': lr}})
 
-            ### run experiment with these parameters
-            ##exp = Experiment(exp_params)
-            ##exp.run(distribution_parameters)
+            # run experiment with these parameters
+            exp = Experiment(exp_params)
+            exp.run(distribution_parameters)
 
