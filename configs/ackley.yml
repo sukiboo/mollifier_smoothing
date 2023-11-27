@@ -1,10 +1,10 @@
 # experiment parameters
 experiment_parameters:
-    function_name: sphere
+    function_name: michalewicz
     dim: 100
-    num_steps: 1000
+    num_steps: 10000
     num_mc: 1000
-    num_tests: 3
+    num_tests: 100
     random_seed: 0
 
 
@@ -13,20 +13,20 @@ distribution_parameters:
 
     # logistic distribution
     - logistic:
-        sigma: 1.0e-0
-        lr: 1.0e-3
+        sigma: 1.0e+1
+        lr: 1.0e-0
 
     # normal distribution
     - normal:
         sigma: 1.0e-0
-        lr: 1.0e-3
+        lr: 1.0e-0
 
     # t distribution
     - t:
         sigma: 1.0e-0
-        lr: 1.0e-3
+        lr: 1.0e-0
 
     # uniform distribution
     - uniform:
-        sigma: 1.0e-0
-        lr: 1.0e-3
+        sigma: 1.0e+1
+        lr: 1.0e-0
