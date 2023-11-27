@@ -25,9 +25,8 @@ def target_function(function_name, dim):
                 a = 20
                 b = .2
                 c = 2*np.pi
-                _dim = dim
-                mean1 = ne.evaluate('sum(x**2 / _dim, axis=1)')
-                mean2 = ne.evaluate('sum(cos(c*x) / _dim, axis=1)')
+                mean1 = np.mean(x**2, axis=1)
+                mean2 = np.mean(ne.evaluate('cos(c*x)'), axis=1)
                 val = ne.evaluate('-a * exp(-b * mean1**.5) - exp(mean2) + a + exp(1)')
                 return val
         else:
@@ -44,8 +43,8 @@ def target_function(function_name, dim):
         if use_numexpr:
             def fun(x):
                 weights = 1 + np.arange(dim)
-                sum1 = ne.evaluate('sum(x**2, axis=1)')
-                prod1 = ne.evaluate('prod(cos(x / weights**.5), axis=1)')
+                sum1 = np.sum(ne.evaluate('x**2'), axis=1)
+                prod1 = np.prod(ne.evaluate('cos(x / weights**.5)'), axis=1)
                 val = sum1 / 4000 - prod1 + 1
                 return val
         else:
@@ -65,7 +64,7 @@ def target_function(function_name, dim):
                 wd = w[-1]
                 pi = np.pi
                 first = ne.evaluate('sin(pi*w1)**2')
-                mid = ne.evaluate('sum((wi - 1)**2 * (1 + 10*sin(pi*wi + 1)**2), axis=0)')
+                mid = np.sum(ne.evaluate('(wi - 1)**2 * (1 + 10*sin(pi*wi + 1)**2)'), axis=0)
                 last = ne.evaluate('(wd - 1)**2 * (1 + sin(2*pi*wd)**2)')
                 val = first + mid + last
                 return val
@@ -98,7 +97,7 @@ def target_function(function_name, dim):
         if use_numexpr:
             def fun(x):
                 pi = np.pi
-                val = 10*dim + ne.evaluate('sum(x**2 - 10*cos(2*pi*x), axis=1)')
+                val = 10*dim + np.sum(ne.evaluate('x**2 - 10*cos(2*pi*x)'), axis=1)
                 return val
         else:
             fun = lambda x: 10*dim + np.sum(x**2 - 10*np.cos(2*np.pi*x), axis=1)
@@ -109,8 +108,8 @@ def target_function(function_name, dim):
     elif function_name == 'rosenbrock':
         if use_numexpr:
             def fun(x):
-                xi, xj = x[:,1:], x[:,:-1]
-                val = ne.evaluate('sum(100*(xj - xi**2)**2 + (xi - 1)**2, axis=1)')
+                xj, xi = x[:,1:], x[:,:-1]
+                val = np.sum(ne.evaluate('100*(xj - xi**2)**2 + (xi - 1)**2'), axis=1)
                 return val
         else:
             fun = lambda x: np.sum(100 * (x[:,1:] - x[:,:-1]**2)**2 + (x[:,:-1] - 1)**2, axis=1)
@@ -121,7 +120,7 @@ def target_function(function_name, dim):
     elif function_name == 'schwefel':
         if use_numexpr:
             def fun(x):
-                val = np.abs(418.9829*dim + ne.evaluate('sum(x * sin(abs(x)**.5), axis=1)'))
+                val = np.abs(418.9829*dim - np.sum(ne.evaluate('x * sin(abs(x)**.5)'), axis=1))
                 return val
         else:
             fun = lambda x: np.abs(418.9829*dim - np.sum(x * np.sin(np.sqrt(np.abs(x))), axis=1))
@@ -132,7 +131,7 @@ def target_function(function_name, dim):
     elif function_name == 'sphere':
         if use_numexpr:
             def fun(x):
-                val = ne.evaluate('sum(x**2, axis=1)')
+                val = np.sum(ne.evaluate('x**2'), axis=1)
                 return val
         else:
             fun = lambda x: np.sum(x**2, axis=1)
