@@ -43,7 +43,7 @@ class Experiment:
             grad = self.smoothed_gradient(x, dist)
             x -= self.lr * grad
             self.logs[savename].append(self.fun(x).item())
-        print(f'{self.fun(x).item():.6f}')
+        ##print(f'{self.fun(x).item():.6f}')
 
     def smoothed_gradient(self, x, dist):
         """Estimate smoothed gradient of the target function at the point x with a given kernel."""
@@ -75,10 +75,10 @@ class Experiment:
 
         # t distribution
         elif dist.startswith('t'):
-            degree_of_freedom = 1
-            u = self.mc_rng.standard_t(degree_of_freedom, size=(self.num_mc, self.dim))
+            degrees_of_freedom = 1
+            u = self.mc_rng.standard_t(degrees_of_freedom, size=(self.num_mc, self.dim))
             norm_u2 = np.sum(u**2, axis=1, keepdims=True)
-            g = u * (degree_of_freedom + self.dim) / (degree_of_freedom + norm_u2)
+            g = u * (degrees_of_freedom + self.dim) / (degrees_of_freedom + norm_u2)
 
         else:
             raise NameError(f'distribution {dist} is not recognized...')
@@ -98,7 +98,6 @@ class Experiment:
 
 if __name__ == '__main__':
 
-    '''
     # parse the arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config',
@@ -120,9 +119,9 @@ if __name__ == '__main__':
     # setup and run the experiment
     exp = Experiment(experiment_parameters)
     exp.run(distribution_parameters)
-    '''
 
 
+    """
     '''hyperparameter search'''
     # setup experiment
     exp_params = {'function_name': 'sphere', 'dim': 100,
@@ -150,4 +149,4 @@ if __name__ == '__main__':
             # run experiment with these parameters
             exp = Experiment(exp_params)
             exp.run(distribution_parameters)
-
+    """
