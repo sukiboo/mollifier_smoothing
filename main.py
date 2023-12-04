@@ -64,7 +64,7 @@ class Experiment:
         elif dist.startswith('logistic'):
             u = self.mc_rng.logistic(size=(self.num_mc, self.dim))
             norm_u = np.linalg.norm(u, axis=1, keepdims=True)
-            g = u / (norm_u * (1 + np.exp(-norm_u)))
+            g = 2*u / (1 + np.exp(-norm_u**2))
 
         # truncated normal distribution
         elif dist.startswith('truncnorm'):
