@@ -6,8 +6,8 @@ Perform numerical optimization via mollifier smoothing.
 - [x] optimization framework
 - [x] numpy kernels
 - [x] data logging
-- [ ] data visualization
-- [ ] config files
-- [ ] hyperparameter search
-- [ ] statistics collection
+- [x] data visualization
+- [x] config files
+- [x] hyperparameter search
+- [x] statistics collection
 - [ ] custom kernels

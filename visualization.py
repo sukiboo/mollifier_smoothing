@@ -78,10 +78,12 @@ def find_best_parameters(logfile, percentile=.5):
     T = len(df_stat)
 
     # find the parameters that provide the minimal values
-    sigmas = [1e+1, 1e+0, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
-    lrs = [1e+0, 1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
+    sigmas = [1e+2, 3e+1, 1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2,
+              1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6]
+    lrs = [1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2, 1e-2, 3e-3,
+           1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6]
     best_ij = df_stat.loc[T-1].idxmin()
-    i, j = int(best_ij[-2]), int(best_ij[-1])
+    i, j = int(best_ij[-4:-2]), int(best_ij[-2:])
     print(f'best parameters for {logfile}:  sigma = {sigmas[i]:.2e},  '\
         + f'lr = {lrs[j]:.2e},  median = {df_stat.loc[T-1][best_ij]:.2e}')
 
