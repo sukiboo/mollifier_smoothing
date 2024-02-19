@@ -53,39 +53,39 @@ class Experiment:
         # normal distribution
         if dist.startswith('normal'):
             u = self.mc_rng.normal(size=(self.num_mc, self.dim))
-            g = -u / self.sigma
+            g = u / self.sigma
 
         # uniform distribution
         elif dist.startswith('uniform'):
             u = 2*self.mc_rng.random(size=(self.num_mc, self.dim)) - 1
-            g = -u / self.sigma
+            g = u / self.sigma
 
         # logistic distribution
         elif dist.startswith('logistic'):
             u = self.mc_rng.logistic(size=(self.num_mc, self.dim))
             norm_u = np.linalg.norm(u, axis=1, keepdims=True)
-            g = -2*u / (1 + np.exp(-norm_u**2))
+            g = 2*u / (1 + np.exp(-norm_u**2))
 
         # truncated normal distribution
         elif dist.startswith('truncnorm'):
             # this is wrong
             u = truncnorm.rvs(-1, 1, size=(self.num_mc, self.dim),
                               random_state=self.rng.integers(1e+9))
-            g = -u / self.sigma
+            g = u / self.sigma
 
         # t distribution with 1 degree of freedom
         elif dist.startswith('t1'):
             degrees_of_freedom = 1
             u = self.mc_rng.standard_t(degrees_of_freedom, size=(self.num_mc, self.dim))
             norm_u2 = np.sum(u**2, axis=1, keepdims=True)
-            g = -u * (degrees_of_freedom + self.dim) / (degrees_of_freedom + norm_u2)
+            g = u * (degrees_of_freedom + self.dim) / (degrees_of_freedom + norm_u2)
 
         # t distribution with 2 degrees of freedom
         elif dist.startswith('t'):
             degrees_of_freedom = 2
             u = self.mc_rng.standard_t(degrees_of_freedom, size=(self.num_mc, self.dim))
             norm_u2 = np.sum(u**2, axis=1, keepdims=True)
-            g = -u * (degrees_of_freedom + self.dim) / (degrees_of_freedom + norm_u2)
+            g = u * (degrees_of_freedom + self.dim) / (degrees_of_freedom + norm_u2)
 
         else:
             raise NameError(f'distribution {dist} is not recognized...')
@@ -148,7 +148,7 @@ if __name__ == '__main__':
 
     # define parameter grid
     funcs = ['sphere', 'ackley', 'levy', 'michalewicz', 'rastrigin', 'rosenbrock', 'schwefel']
-    dists = ['normal', 'uniform', 'logistic', 't', 't1']
+    dists = ['normal', 'uniform', 'logistic', 't']
     sigmas = [1e+2, 3e+1, 1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2,
               1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6]
     lrs = [1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2, 1e-2, 3e-3,
