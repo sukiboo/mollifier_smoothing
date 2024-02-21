@@ -53,12 +53,12 @@ class Experiment:
         # normal distribution
         if dist.startswith('normal'):
             u = self.mc_rng.normal(size=(self.num_mc, self.dim))
-            g = u / self.sigma
+            g = u
 
         # uniform distribution
         elif dist.startswith('uniform'):
             u = 2*self.mc_rng.random(size=(self.num_mc, self.dim)) - 1
-            g = u / self.sigma
+            g = u
 
         # logistic distribution
         elif dist.startswith('logistic'):
@@ -71,7 +71,7 @@ class Experiment:
             # this is wrong
             u = truncnorm.rvs(-1, 1, size=(self.num_mc, self.dim),
                               random_state=self.rng.integers(1e+9))
-            g = u / self.sigma
+            g = u
 
         # t distribution with 1 degree of freedom
         elif dist.startswith('t1'):
@@ -92,7 +92,7 @@ class Experiment:
 
         # estimate smoothed gradient
         fun_diff = (self.fun(x + self.sigma * u) - self.fun(x - self.sigma * u)).reshape(-1,1)
-        grad = g * fun_diff
+        grad = g * fun_diff / (2 * sigma)
         return grad.mean(axis=0, keepdims=True)
 
     def save_logs(self):
