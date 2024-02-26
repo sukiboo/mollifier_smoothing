@@ -91,8 +91,8 @@ def find_best_parameters(logfile, percentile=.5):
 
 
 def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't', 'uniform'],
-        ##funcs=['ackley', 'levy', 'michalewicz', 'rastrigin', 'rosenbrock', 'schwefel']):
-        funcs=['ackley']):
+        funcs=['ackley', 'levy', 'michalewicz', 'rastrigin', 'rosenbrock', 'schwefel']):
+        ##funcs=['levy']):
     """Plot grid searches for each function and distribution."""
     # grid search parameters
     sigmas = [1e+2, 3e+1, 1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2,
@@ -102,6 +102,8 @@ def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't',
     val_range = {'ackley': (0, 25), 'levy': (1000, 1500),
                  'michalewicz': (-30, 0), 'rastrigin': (0, 2000),
                  'rosenbrock': (0, 1.5e+7), 'schwefel': (0, 45000)}
+
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
 
     # plot grid for every function
     for func in funcs:
@@ -123,8 +125,10 @@ def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't',
             df = pd.read_csv(f'./logs/search/{func}_{dist}.csv', index_col=0)
             df = df.clip(upper=vmax)
             ##df_stat = df.groupby(lambda x: x.split('|')[0], axis=1).quantile(percentile)
+            ##df_agg = df.T.groupby(lambda x: x.split('|')[0])
             df_agg = df.groupby(lambda x: x.split('|')[0], axis=1)
             df_stat = df_agg.median()
+            ##df_stat = (df_agg.sum() - df_agg.min() - df_agg.max()) / 3
 
             # plot the quality matrix
             vals = df_stat.loc[len(df_stat)-1].values.reshape(len(sigmas), len(lrs))
@@ -152,7 +156,18 @@ def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't',
         ##for i in range(grid_size[0]):
             ##for j in range(grid_size[1]):
                 ##ax.text(j, i, f'{mu_mat[i,j]:.3f}', size=8, weight='bold', ha='center', va='center')
-        fig.colorbar(cbar)
+
+        # add colorbar
+        ##divider = make_axes_locatable(fig)
+        ##cax = divider.append_axes('right', size='20%', pad=1)#, aspect=10)
+        ##cax = fig.add_axes([.95, .1, .02, .8])
+        ##im = ax.imshow(data, cmap='bone')
+        ##fig.colorbar(im, cax=cax, orientation='vertical')
+        ##fig.colorbar(cbar, cax=cax)#, pad=.2, aspect=10)#, orientation='vertical')
+        fig.colorbar(cbar, ax=axs[-1])#, pad=.2, aspect=10)
+
+
+        # save the figure
         plt.tight_layout()
         os.makedirs('./images/grids', exist_ok=True)
         plt.savefig(f'./images/grids/{func}_grids.png', format='png', dpi=300)
@@ -162,13 +177,13 @@ def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't',
 
 if __name__ == '__main__':
 
-    df = plot_hyperparameter_heatmap()
+    ##df = plot_hyperparameter_heatmap()
 
-    '''
+    ##'''
     # visualize each log file
     logdir = './logs/search/'
     for logfile in sorted(os.listdir(logdir)):
         find_best_parameters(logdir + logfile)
         ##visualize(logdir + logfile, show=True)
         ##visualize_search(logdir + logfile, show=False)
-    '''
+    ##'''
