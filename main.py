@@ -92,7 +92,7 @@ class Experiment:
 
         # estimate smoothed gradient
         fun_diff = (self.fun(x + self.sigma * u) - self.fun(x - self.sigma * u)).reshape(-1,1)
-        grad = g * fun_diff / (2 * sigma)
+        grad = g * fun_diff / (2 * self.sigma)
         return grad.mean(axis=0, keepdims=True)
 
     def save_logs(self):
