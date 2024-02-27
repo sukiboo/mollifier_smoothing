@@ -134,7 +134,7 @@ if __name__ == '__main__':
     '''hyperparameter search'''
     # setup experiment
     exp_params = {'function_name': 'sphere', 'dim': 100,
-                  'num_steps': 10000, 'num_mc': 1000, 'num_tests': 10,
+                  'num_steps': 10000, 'num_mc': 100, 'num_tests': 10,
                   'random_seed': 0, 'exp_name': 'dev'}
 
     # number of iterations for each function

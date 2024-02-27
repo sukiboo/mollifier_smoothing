@@ -87,7 +87,7 @@ def find_best_parameters(logfile, percentile=.5):
     best_ij = df_stat.loc[T-1].idxmin()
     i, j = int(best_ij[-4:-2]), int(best_ij[-2:])
     print(f'best parameters for {logfile}:  sigma = {sigmas[i]:.2e},  '\
-        + f'lr = {lrs[j]:.2e},  median = {df_stat.loc[T-1][best_ij]:.2e}')
+        + f'lr = {lrs[~j]:.2e},  median = {df_stat.loc[T-1][best_ij]:.2e}')
 
 
 def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't', 'uniform'],
@@ -103,7 +103,7 @@ def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't',
                  'michalewicz': (-30, 0), 'rastrigin': (0, 2000),
                  'rosenbrock': (0, 1.5e+7), 'schwefel': (0, 45000)}
 
-    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    ##from mpl_toolkits.axes_grid1 import make_axes_locatable
 
     # plot grid for every function
     for func in funcs:
@@ -181,9 +181,9 @@ if __name__ == '__main__':
 
     ##'''
     # visualize each log file
+    ##logdir = './logs/'
     logdir = './logs/search/'
     for logfile in sorted(os.listdir(logdir)):
         find_best_parameters(logdir + logfile)
         ##visualize(logdir + logfile, show=True)
-        ##visualize_search(logdir + logfile, show=False)
     ##'''
