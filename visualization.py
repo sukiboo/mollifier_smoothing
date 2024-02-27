@@ -87,12 +87,12 @@ def find_best_parameters(logfile, percentile=.5):
     best_ij = df_stat.loc[T-1].idxmin()
     i, j = int(best_ij[-4:-2]), int(best_ij[-2:])
     print(f'best parameters for {logfile}:  sigma = {sigmas[i]:.2e},  '\
-        + f'lr = {lrs[~j]:.2e},  median = {df_stat.loc[T-1][best_ij]:.2e}')
+        + f'lr = {lrs[j]:.2e},  median = {df_stat.loc[T-1][best_ij]:.2e}')
 
 
 def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't', 'uniform'],
-        funcs=['ackley', 'levy', 'michalewicz', 'rastrigin', 'rosenbrock', 'schwefel']):
-        ##funcs=['levy']):
+        ##funcs=['ackley', 'levy', 'michalewicz', 'rastrigin', 'rosenbrock', 'schwefel']):
+        funcs=['schwefel']):
     """Plot grid searches for each function and distribution."""
     # grid search parameters
     sigmas = [1e+2, 3e+1, 1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2,
@@ -127,8 +127,9 @@ def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't',
             ##df_stat = df.groupby(lambda x: x.split('|')[0], axis=1).quantile(percentile)
             ##df_agg = df.T.groupby(lambda x: x.split('|')[0])
             df_agg = df.groupby(lambda x: x.split('|')[0], axis=1)
-            df_stat = df_agg.median()
+            ##df_stat = df_agg.median()
             ##df_stat = (df_agg.sum() - df_agg.min() - df_agg.max()) / 3
+            df_stat = (df_agg.sum() - df_agg.min() - df_agg.max()) / 8
 
             # plot the quality matrix
             vals = df_stat.loc[len(df_stat)-1].values.reshape(len(sigmas), len(lrs))
@@ -181,9 +182,9 @@ if __name__ == '__main__':
 
     ##'''
     # visualize each log file
-    ##logdir = './logs/'
-    logdir = './logs/search/'
+    logdir = './logs/'
+    ##logdir = './logs/search/'
     for logfile in sorted(os.listdir(logdir)):
-        find_best_parameters(logdir + logfile)
-        ##visualize(logdir + logfile, show=True)
+        ##find_best_parameters(logdir + logfile)
+        visualize(logdir + logfile, show=True)
     ##'''
