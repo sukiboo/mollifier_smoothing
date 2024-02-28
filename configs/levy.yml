@@ -13,20 +13,20 @@ distribution_parameters:
 
     # logistic distribution
     - logistic:
-        sigma: 3.0e-6
-        lr: 3.0e-3
+        sigma: 1.0e+0
+        lr: 1.0e-3
 
     # normal distribution
     - normal:
-        sigma: 1.0e-3
-        lr: 1.0e-1
+        sigma: 3.0e+0
+        lr: 3.0e-3
 
     # t distribution
     - t:
-        sigma: 3.0e-6
-        lr: 3.0e-4
+        sigma: 1.0e+0
+        lr: 3.0e-3
 
     # uniform distribution
     - uniform:
-        sigma: 3.0e+0
-        lr: 1.0e+1
+        sigma: 1.0e+1
+        lr: 3.0e-1

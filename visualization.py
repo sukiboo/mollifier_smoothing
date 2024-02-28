@@ -91,8 +91,8 @@ def find_best_parameters(logfile, percentile=.5):
 
 
 def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't', 'uniform'],
-        ##funcs=['ackley', 'levy', 'michalewicz', 'rastrigin', 'rosenbrock', 'schwefel']):
-        funcs=['schwefel']):
+        funcs=['ackley', 'levy', 'michalewicz', 'rastrigin', 'rosenbrock', 'schwefel']):
+        ##funcs=['schwefel']):
     """Plot grid searches for each function and distribution."""
     # grid search parameters
     sigmas = [1e+2, 3e+1, 1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2,
@@ -128,8 +128,8 @@ def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't',
             ##df_agg = df.T.groupby(lambda x: x.split('|')[0])
             df_agg = df.groupby(lambda x: x.split('|')[0], axis=1)
             ##df_stat = df_agg.median()
-            ##df_stat = (df_agg.sum() - df_agg.min() - df_agg.max()) / 3
-            df_stat = (df_agg.sum() - df_agg.min() - df_agg.max()) / 8
+            df_stat = (df_agg.sum() - df_agg.min() - df_agg.max()) / 3
+            ##df_stat = (df_agg.sum() - df_agg.min() - df_agg.max()) / 8
 
             # plot the quality matrix
             vals = df_stat.loc[len(df_stat)-1].values.reshape(len(sigmas), len(lrs))
@@ -178,13 +178,13 @@ def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't',
 
 if __name__ == '__main__':
 
-    ##df = plot_hyperparameter_heatmap()
+    df = plot_hyperparameter_heatmap()
 
-    ##'''
+    '''
     # visualize each log file
     logdir = './logs/'
     ##logdir = './logs/search/'
     for logfile in sorted(os.listdir(logdir)):
         ##find_best_parameters(logdir + logfile)
         visualize(logdir + logfile, show=True)
-    ##'''
+    '''
