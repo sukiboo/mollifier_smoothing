@@ -6,11 +6,21 @@ import matplotlib.cm as cm
 import seaborn as sns
 from matplotlib.colors import LogNorm, Normalize
 
-sns.set_theme(style='darkgrid', palette='muted', font='monospace', font_scale=.8)
+sns.set_theme(style='darkgrid', palette='muted', font='monospace', font_scale=1.5)
 
 
 def visualize(logfile, percentile=(.25,.5,.75), show=True):
     '''Visualize optimization results.'''
+    style = {
+         'ackley': {'scale': 'linear', 'ylim': (-1, 23), 'max_iter': 10000},
+           'levy': {'scale': 'symlog', 'ylim': (0, 1500), 'max_iter': 3000},
+    'michalewicz': {'scale': 'linear', 'ylim': (-65, -5), 'max_iter': 10000},
+      'rastrigin': {'scale': 'symlog', 'ylim': (-1, 2500), 'max_iter': 25},
+     'rosenbrock': {'scale': 'symlog', 'ylim': (100, 1e+8), 'max_iter': 200},
+       'schwefel': {'scale': 'symlog', 'ylim': (15000, 45000), 'max_iter': 25},
+    }
+    func_name = logfile.split('/')[-1].split('.')[0]
+
     # read logs and aggregate statistics over multiple runs
     df = pd.read_csv(logfile, index_col=0)
     df_min = df.groupby(lambda x: x.split('|')[0], axis=1).quantile(percentile[0])
@@ -21,23 +31,53 @@ def visualize(logfile, percentile=(.25,.5,.75), show=True):
     fig, ax = plt.subplots(figsize=(8,5))
     algs = df_med.columns.to_list()
     for alg in algs:
-        plt.plot(df_med[alg], linewidth=4, alpha=.9, label=alg)
-        plt.fill_between(range(len(df_med)), df_min[alg], df_max[alg], alpha=.25)
+        plt.plot(df_med[alg][:style[func_name]['max_iter']], linewidth=4, alpha=.9, label=alg)
+        ##plt.fill_between(range(len(df_med)), df_min[alg], df_max[alg], alpha=.25)
+        plt.fill_between(range(style[func_name]['max_iter']),
+                         df_min[alg][:style[func_name]['max_iter']],
+                         df_max[alg][:style[func_name]['max_iter']],
+                         alpha=.25)
 
     # configure axis
-    ax.set_ylim(df.min().min(), df.loc[0].max())
-    ax.set_title(f"{logfile.split('/')[-1].split('.')[0]}")
+    ##ax.set_ylim(df.min().min(), df.loc[0].max())
+    ax.set_ylim(*style[func_name]['ylim'])
+    ax.set_yscale(style[func_name]['scale'])
+    ax.set_title(f'{func_name}')
     plt.legend()
     plt.tight_layout()
 
     # save the results
     os.makedirs('./images/', exist_ok=True)
-    savename = logfile.split('/')[-1].split('.')[0]
-    plt.savefig(f'./images/{savename}.png', dpi=300, format='png')
+    plt.savefig(f'./images/{func_name}.png', dpi=300, format='png')
     if show:
         plt.show()
     else:
         plt.close()
+
+
+def find_best_parameters(logfile, percentile=.5):
+    """Report the best hyperparameters."""
+    # read logs and aggregate statistics over multiple runs
+    df = pd.read_csv(logfile, index_col=0)
+    df_stat = df.groupby(lambda x: x.split('|')[0], axis=1).quantile(percentile)
+    T = len(df_stat)
+
+    # find the parameters that provide the minimal values
+    sigmas = [1e+2, 3e+1, 1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2,
+              1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6]
+    lrs = [1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2, 1e-2, 3e-3,
+           1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6]
+    best_ij = df_stat.loc[T-1].idxmin()
+    i, j = int(best_ij[-4:-2]), int(best_ij[-2:])
+    print(f'best parameters for {logfile}:  sigma = {sigmas[i]:.2e},  '\
+        + f'lr = {lrs[j]:.2e},  median = {df_stat.loc[T-1][best_ij]:.2e}')
+
+
+def visualize_all(logdir='./logs/'):
+    """Visualize optimization process for all log files in a given directory."""
+    for logfile in sorted(os.listdir(logdir)):
+        find_best_parameters(logdir + logfile)
+        visualize(logdir + logfile, show=True)
 
 
 def visualize_search(logfile, percentile=(.25,.5,.75), show=True):
@@ -72,27 +112,8 @@ def visualize_search(logfile, percentile=(.25,.5,.75), show=True):
         plt.close()
 
 
-def find_best_parameters(logfile, percentile=.5):
-    """Report the best hyperparameters."""
-    # read logs and aggregate statistics over multiple runs
-    df = pd.read_csv(logfile, index_col=0)
-    df_stat = df.groupby(lambda x: x.split('|')[0], axis=1).quantile(percentile)
-    T = len(df_stat)
-
-    # find the parameters that provide the minimal values
-    sigmas = [1e+2, 3e+1, 1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2,
-              1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6]
-    lrs = [1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2, 1e-2, 3e-3,
-           1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6]
-    best_ij = df_stat.loc[T-1].idxmin()
-    i, j = int(best_ij[-4:-2]), int(best_ij[-2:])
-    print(f'best parameters for {logfile}:  sigma = {sigmas[i]:.2e},  '\
-        + f'lr = {lrs[j]:.2e},  median = {df_stat.loc[T-1][best_ij]:.2e}')
-
-
 def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't', 'uniform'],
         funcs=['ackley', 'levy', 'michalewicz', 'rastrigin', 'rosenbrock', 'schwefel']):
-        ##funcs=['schwefel']):
     """Plot grid searches for each function and distribution."""
     # grid search parameters
     sigmas = [1e+2, 3e+1, 1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2,
@@ -170,8 +191,8 @@ def plot_hyperparameter_heatmap(percentile=.5, dists=['logistic', 'normal', 't',
 
         # save the figure
         plt.tight_layout()
-        os.makedirs('./images/grids', exist_ok=True)
-        plt.savefig(f'./images/grids/{func}_grids.png', format='png', dpi=300)
+        os.makedirs('./images', exist_ok=True)
+        plt.savefig(f'./images/{func}_grids.png', format='png', dpi=300)
         ##plt.show()
         plt.close()
 
@@ -180,11 +201,3 @@ if __name__ == '__main__':
 
     df = plot_hyperparameter_heatmap()
 
-    '''
-    # visualize each log file
-    logdir = './logs/'
-    ##logdir = './logs/search/'
-    for logfile in sorted(os.listdir(logdir)):
-        ##find_best_parameters(logdir + logfile)
-        visualize(logdir + logfile, show=True)
-    '''
