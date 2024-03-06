@@ -43,7 +43,6 @@ class Experiment:
             grad = self.smoothed_gradient(x, dist)
             x -= self.lr * grad
             self.logs[savename].append(self.fun(x).item())
-        ##print(f'{self.fun(x).item():.2e}')
 
     def smoothed_gradient(self, x, dist):
         """Estimate smoothed gradient of the target function at the point x with a given kernel."""
@@ -73,13 +72,6 @@ class Experiment:
                               random_state=self.rng.integers(1e+9))
             g = u
 
-        # t distribution with 1 degree of freedom
-        elif dist.startswith('t1'):
-            degrees_of_freedom = 1
-            u = self.mc_rng.standard_t(degrees_of_freedom, size=(self.num_mc, self.dim))
-            norm_u2 = np.sum(u**2, axis=1, keepdims=True)
-            g = u * (degrees_of_freedom + self.dim) / (degrees_of_freedom + norm_u2)
-
         # t distribution with 2 degrees of freedom
         elif dist.startswith('t'):
             degrees_of_freedom = 2
@@ -105,7 +97,6 @@ class Experiment:
 
 if __name__ == '__main__':
 
-    """
     # parse the arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config',
@@ -127,49 +118,3 @@ if __name__ == '__main__':
     # setup and run the experiment
     exp = Experiment(experiment_parameters)
     exp.run(distribution_parameters)
-    """
-
-
-    ##"""
-    '''hyperparameter search'''
-    # setup experiment
-    exp_params = {'function_name': 'sphere', 'dim': 100,
-                  'num_steps': 10000, 'num_mc': 100, 'num_tests': 10,
-                  'random_seed': 0, 'exp_name': 'dev'}
-
-    # number of iterations for each function
-    num_steps = {'sphere': 1000,
-                 'ackley': 25000,
-                 'levy': 3000,
-                 'michalewicz': 10000,
-                 'rastrigin': 1000,
-                 'rosenbrock': 1000,
-                 'schwefel': 1000}
-
-    # define parameter grid
-    funcs = ['sphere', 'ackley', 'levy', 'michalewicz', 'rastrigin', 'rosenbrock', 'schwefel']
-    dists = ['normal', 'uniform', 'logistic', 't']
-    sigmas = [1e+2, 3e+1, 1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2,
-              1e-2, 3e-3, 1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6]
-    lrs = [1e+1, 3e+0, 1e+0, 3e-1, 1e-1, 3e-2, 1e-2, 3e-3,
-           1e-3, 3e-4, 1e-4, 3e-5, 1e-5, 3e-6, 1e-6]
-
-    # run search for all distributions and parameters
-    for func in funcs:
-        exp_params['function_name'] = func
-        for dist in dists:
-
-            # modify experiment parameters for the current function and distribution
-            exp_params['exp_name'] = f'{func}_{dist}'
-            exp_params['num_steps'] = num_steps[func]
-            distribution_parameters = []
-
-            # form parameter list
-            for i, sigma in enumerate(sigmas):
-                for j, lr in enumerate(lrs):
-                    distribution_parameters.append({f'{dist}_{i:02d}{j:02d}': {'sigma': sigma, 'lr': lr}})
-
-            # run experiment with these parameters
-            exp = Experiment(exp_params)
-            exp.run(distribution_parameters)
-    ##"""
