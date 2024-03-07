@@ -90,7 +90,7 @@ class Experiment:
     def save_logs(self):
         """Save logs to a csv file."""
         os.makedirs('./logs/', exist_ok=True)
-        self.df = pd.DataFrame(exp.logs)
+        self.df = pd.DataFrame(self.logs)
         self.df.to_csv(f'./logs/{self.exp_name}.csv')
         print(f'\n{self.df}')
 
