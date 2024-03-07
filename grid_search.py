@@ -34,16 +34,16 @@ def grid_search(exp_params, num_steps):
 if __name__ == '__main__':
 
     # experiment parameters
-    exp_params = {'dim': 100, 'num_mc': 100, 'num_tests': 10, 'random_seed': 0}
+    exp_params = {'dim': 100, 'num_mc': 100, 'num_tests': 25, 'random_seed': 0}
 
     # number of iterations for each function
-    num_steps = {'sphere': 1000,
-                 'ackley': 25000,
+    num_steps = {'sphere': 100,
+                 'ackley': 10000,
                  'levy': 3000,
                  'michalewicz': 10000,
-                 'rastrigin': 1000,
-                 'rosenbrock': 1000,
-                 'schwefel': 1000}
+                 'rastrigin': 100,
+                 'rosenbrock': 200,
+                 'schwefel': 100}
 
     grid_search(exp_params, num_steps)
 
